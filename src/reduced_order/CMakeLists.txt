@@ -6,7 +6,10 @@ set(SOURCE
     pod_basis_offline.cpp
     halton.cpp
     nearest_neighbors.cpp
-    min_max_scaler.cpp)
+    min_max_scaler.cpp
+    assemble_problem_ECSW.cpp
+    assemble_ECSW_jacobian.cpp
+    hyper_reduced_adaptive_sampling.cpp)
 
 foreach(dim RANGE 1 3)
     # Output library

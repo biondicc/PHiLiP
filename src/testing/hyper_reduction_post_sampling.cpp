@@ -4,12 +4,12 @@
 #include "flow_solver/flow_solver.h"
 #include "flow_solver/flow_solver_factory.h"
 #include "ode_solver/ode_solver_factory.h"
-#include "hyper_reduction/assemble_problem_ECSW.h"
-#include "hyper_reduction/assemble_ECSW_jacobian.h"
+#include "reduced_order/assemble_problem_ECSW.h"
+#include "reduced_order/assemble_ECSW_jacobian.h"
 #include "linear_solver/NNLS_solver.h"
 #include "linear_solver/helper_functions.h"
 #include "pod_adaptive_sampling.h"
-#include "hyper_reduction/hyper_reduced_adaptive_sampling.h"
+#include "reduced_order/hyper_reduced_adaptive_sampling.h"
 #include <eigen/Eigen/Dense>
 #include <iostream>
 #include <filesystem>
