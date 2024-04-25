@@ -17,7 +17,7 @@
 #include "reduced_order/halton.h"
 #include "reduced_order/min_max_scaler.h"
 #include "pod_adaptive_sampling.h"
-#include "assemble_problem_ECSW.h"
+#include "assemble_ECSW_residual.h"
 #include "assemble_ECSW_jacobian.h"
 #include "linear_solver/NNLS_solver.h"
 #include "linear_solver/helper_functions.h"
@@ -56,7 +56,7 @@ int HyperreducedAdaptiveSampling<dim, nstate>::run_sampling() const
     std::shared_ptr<AdaptiveSampling<dim,nstate>> parameter_sampling = std::make_unique<AdaptiveSampling<dim,nstate>>(all_parameters, parameter_handler);
     // Find C and d for NNLS Problem
     std::cout << "Construct instance of Assembler..."<< std::endl;
-    AssembleECSWJac<dim,nstate> constructer_NNLS_problem(all_parameters, parameter_handler, flow_solver->dg, current_pod, parameter_sampling, ode_solver_type);
+    AssembleECSWJac<dim,nstate> constructer_NNLS_problem(this->all_parameters, this->parameter_handler, flow_solver->dg, this->current_pod, this->snapshot_parameters, ode_solver_type);
     std::cout << "Build Problem..."<< std::endl;
     constructer_NNLS_problem.build_problem();
 
@@ -105,7 +105,7 @@ int HyperreducedAdaptiveSampling<dim, nstate>::run_sampling() const
 
         // Find C and d for NNLS Problem
         std::cout << "Construct instance of Assembler..."<< std::endl;
-        AssembleECSWJac<dim,nstate> constructer_NNLS_problem(all_parameters, parameter_handler, flow_solver->dg, current_pod, parameter_sampling, ode_solver_type);
+        AssembleECSWJac<dim,nstate> constructer_NNLS_problem(this->all_parameters, this->parameter_handler, flow_solver->dg, this->current_pod, this->snapshot_parameters, ode_solver_type);
         std::cout << "Build Problem..."<< std::endl;
         constructer_NNLS_problem.build_problem();
 

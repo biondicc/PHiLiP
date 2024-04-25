@@ -1,5 +1,5 @@
-#ifndef __ASSEMBLE_ECSW_JACOBIAN__
-#define __ASSEMBLE_ECSW_JACOBIAN__
+#ifndef __ASSEMBLE_PROBLEM_ECSW__
+#define __ASSEMBLE_PROBLEM_ECSW__
 
 #include <eigen/Eigen/Dense>
 #include <Epetra_CrsMatrix.h>
@@ -17,16 +17,16 @@ using Eigen::MatrixXd;
 using Eigen::RowVectorXd;
 using Eigen::VectorXd;
 
-/// Class for assembling NNLS problem (C matrix & d vector from the Jacobian of each snapshot) for finding
+/// Class for assembling NNLS problem (C matrix & d vector from the residual of each snapshot) for finding
 /// the weights for the ECSW hyper-reduction approach. NOTE: This class does not solve for the weights, but
 /// A and b can be passed to the NNLS solver class.
 
 template <int dim, int nstate>
-class AssembleECSWJac: public AssembleECSWBase<dim,nstate>
+class AssembleECSWRes: public AssembleECSWBase<dim,nstate>
 {
 public:
     /// Constructor
-    AssembleECSWJac(
+    AssembleECSWRes(
         const PHiLiP::Parameters::AllParameters *const parameters_input,
         const dealii::ParameterHandler &parameter_handler_input,
         std::shared_ptr<DGBase<dim,double>> &dg_input, 
@@ -35,7 +35,7 @@ public:
         Parameters::ODESolverParam::ODESolverEnum ode_solver_type);
 
     /// Destructor
-    ~AssembleECSWJac () {};
+    ~AssembleECSWRes () {};
 
     /// Fill entries of A and b
     void build_problem() override;

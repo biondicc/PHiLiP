@@ -7,11 +7,12 @@ set(SOURCE
     halton.cpp
     nearest_neighbors.cpp
     min_max_scaler.cpp
-    assemble_problem_ECSW.cpp
+    assemble_ECSW_residual.cpp
     assemble_ECSW_jacobian.cpp
     pod_adaptive_sampling.cpp
     hyper_reduced_adaptive_sampling.cpp
-    adaptive_sampling_base.cpp)
+    adaptive_sampling_base.cpp
+    assemble_ECSW_training_data_base.cpp)
 
 foreach(dim RANGE 1 3)
     # Output library

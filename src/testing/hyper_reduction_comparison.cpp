@@ -4,7 +4,8 @@
 #include "flow_solver/flow_solver.h"
 #include "flow_solver/flow_solver_factory.h"
 #include "ode_solver/ode_solver_factory.h"
-#include "reduced_order/assemble_problem_ECSW.h"
+#include "reduced_order/assemble_ECSW_residual.h"
+#include "reduced_order/assemble_ECSW_jacobian.h"
 #include "linear_solver/NNLS_solver.h"
 #include "linear_solver/helper_functions.h"
 #include "reduced_order/pod_adaptive_sampling.h"
@@ -53,7 +54,7 @@ int HyperReductionComparison<dim, nstate>::run_test() const
 
     // Find C and d for NNLS Problem
     std::cout << "Construct instance of Assembler..."<< std::endl;
-    HyperReduction::AssembleECSW<dim,nstate> constructer_NNLS_problem(all_parameters, parameter_handler, flow_solver_hyper_reduced_petrov_galerkin->dg, parameter_sampling->current_pod, parameter_sampling, ode_solver_type);
+    HyperReduction::AssembleECSWRes<dim,nstate> constructer_NNLS_problem(all_parameters, parameter_handler, flow_solver_hyper_reduced_petrov_galerkin->dg, parameter_sampling->current_pod, snapshot_parameters, ode_solver_type);
     std::cout << "Build Problem..."<< std::endl;
     constructer_NNLS_problem.build_problem();
 
