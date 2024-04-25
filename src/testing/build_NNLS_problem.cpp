@@ -7,7 +7,7 @@
 #include "reduced_order/assemble_problem_ECSW.h"
 #include "linear_solver/NNLS_solver.h"
 #include "linear_solver/helper_functions.h"
-#include "pod_adaptive_sampling.h"
+#include "reduced_order/pod_adaptive_sampling.h"
 #include <iostream>
 
 namespace PHiLiP {

@@ -181,7 +181,7 @@ public:
         reduced_order,
         convection_diffusion_periodicity,
         POD_adaptation,
-        POD_adaptive_sampling,
+        POD_adaptive_sampling_run,
         adaptive_sampling_testing,
         finite_difference_sensitivity,
         advection_periodicity,

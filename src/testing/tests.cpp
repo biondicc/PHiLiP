@@ -32,7 +32,7 @@
 #include "convection_diffusion_explicit_periodic.h"
 #include "dual_weighted_residual_mesh_adaptation.h"
 #include "anisotropic_mesh_adaptation_cases.h"
-#include "pod_adaptive_sampling.h"
+#include "pod_adaptive_sampling_run.h"
 #include "pod_adaptive_sampling_testing.h"
 #include "taylor_green_vortex_energy_check.h"
 #include "taylor_green_vortex_restart_check.h"
@@ -277,8 +277,8 @@ std::unique_ptr< TestsBase > TestsFactory<dim,nstate,MeshType>
         if constexpr (dim==1 && nstate==1) return std::make_unique<Shock1D<dim,nstate>>(parameters_input);
     } else if(test_type == Test_enum::reduced_order) {
         if constexpr ((dim==2 && nstate==dim+2) || (dim==1 && nstate==1)) return std::make_unique<ReducedOrder<dim,nstate>>(parameters_input, parameter_handler_input);
-    } else if(test_type == Test_enum::POD_adaptive_sampling) {
-        if constexpr ((dim==2 && nstate==dim+2) || (dim==1 && nstate==1)) return std::make_unique<AdaptiveSampling<dim,nstate>>(parameters_input,parameter_handler_input);
+    } else if(test_type == Test_enum::POD_adaptive_sampling_run) {
+        if constexpr ((dim==2 && nstate==dim+2) || (dim==1 && nstate==1)) return std::make_unique<AdaptiveSamplingRun<dim,nstate>>(parameters_input,parameter_handler_input);
     } else if(test_type == Test_enum::adaptive_sampling_testing) {
         if constexpr ((dim==2 && nstate==dim+2) || (dim==1 && nstate==1)) return std::make_unique<AdaptiveSamplingTesting<dim,nstate>>(parameters_input,parameter_handler_input);
     } else if(test_type == Test_enum::euler_naca0012) {

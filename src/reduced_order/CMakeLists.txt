@@ -9,7 +9,9 @@ set(SOURCE
     min_max_scaler.cpp
     assemble_problem_ECSW.cpp
     assemble_ECSW_jacobian.cpp
-    hyper_reduced_adaptive_sampling.cpp)
+    pod_adaptive_sampling.cpp
+    hyper_reduced_adaptive_sampling.cpp
+    adaptive_sampling_base.cpp)
 
 foreach(dim RANGE 1 3)
     # Output library

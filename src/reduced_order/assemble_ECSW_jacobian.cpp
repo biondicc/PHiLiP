@@ -19,7 +19,7 @@ AssembleECSWJac<dim,nstate>::AssembleECSWJac(
     const dealii::ParameterHandler &parameter_handler_input,
     std::shared_ptr<DGBase<dim,double>> &dg_input, 
     std::shared_ptr<ProperOrthogonalDecomposition::PODBase<dim>> pod, 
-    std::shared_ptr<Tests::AdaptiveSampling<dim,nstate>> parameter_sampling_input,
+    std::shared_ptr<AdaptiveSampling<dim,nstate>> parameter_sampling_input,
     Parameters::ODESolverParam::ODESolverEnum ode_solver_type)
         : all_parameters(parameters_input)
         , parameter_handler(parameter_handler_input)

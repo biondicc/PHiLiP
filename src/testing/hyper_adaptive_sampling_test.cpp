@@ -7,7 +7,7 @@
 #include "reduced_order/assemble_problem_ECSW.h"
 #include "linear_solver/NNLS_solver.h"
 #include "linear_solver/helper_functions.h"
-#include "pod_adaptive_sampling.h"
+#include "reduced_order/pod_adaptive_sampling.h"
 #include "reduced_order/hyper_reduced_adaptive_sampling.h"
 #include <iostream>
 
@@ -36,7 +36,7 @@ int HyperAdaptiveSamplingTest<dim, nstate>::run_test() const
     pcout << "Starting hyper-reduction adaptive sampling test..." << std::endl;
 
     HyperReduction::HyperreducedAdaptiveSampling<dim, nstate> sampling_imp(this->all_parameters, parameter_handler);
-    int exit = sampling_imp.run();
+    int exit = sampling_imp.run_sampling();
     
     if (exit == 0){
         pcout << "Passed!";

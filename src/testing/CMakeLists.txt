@@ -25,7 +25,7 @@ set(TESTS_SOURCE
     anisotropic_mesh_adaptation_cases.cpp
     taylor_green_vortex_energy_check.cpp
     taylor_green_vortex_restart_check.cpp
-    pod_adaptive_sampling.cpp
+    pod_adaptive_sampling_run.cpp
     pod_adaptive_sampling_testing.cpp
     reduced_order.cpp
     time_refinement_study.cpp

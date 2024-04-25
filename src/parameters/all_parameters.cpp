@@ -390,7 +390,7 @@ void AllParameters::parse_parameters (dealii::ParameterHandler &prm)
     else if (test_string == "shock_1d")                                 { test_type = shock_1d; }
     else if (test_string == "reduced_order")                            { test_type = reduced_order; }
     else if (test_string == "POD_adaptation")                           { test_type = POD_adaptation; }
-    else if (test_string == "POD_adaptive_sampling")                    { test_type = POD_adaptive_sampling; }
+    else if (test_string == "POD_adaptive_sampling_run")                { test_type = POD_adaptive_sampling_run; }
     else if (test_string == "adaptive_sampling_testing")                { test_type = adaptive_sampling_testing; }
     else if (test_string == "finite_difference_sensitivity")            { test_type = finite_difference_sensitivity; }
     else if (test_string == "euler_naca0012")                           { test_type = euler_naca0012; }

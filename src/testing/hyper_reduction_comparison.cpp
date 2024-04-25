@@ -7,7 +7,7 @@
 #include "reduced_order/assemble_problem_ECSW.h"
 #include "linear_solver/NNLS_solver.h"
 #include "linear_solver/helper_functions.h"
-#include "pod_adaptive_sampling.h"
+#include "reduced_order/pod_adaptive_sampling.h"
 #include <iostream>
 
 namespace PHiLiP {
@@ -48,7 +48,7 @@ int HyperReductionComparison<dim, nstate>::run_test() const
 
     // Run Adaptive Sampling to choose snapshot locations and create POD basis
     std::shared_ptr<AdaptiveSampling<dim,nstate>> parameter_sampling = std::make_unique<AdaptiveSampling<dim,nstate>>(all_parameters, parameter_handler);
-    parameter_sampling->run_test();
+    parameter_sampling->run_sampling();
     MatrixXd snapshot_parameters = parameter_sampling->snapshot_parameters;
 
     // Find C and d for NNLS Problem

@@ -8,7 +8,7 @@
 #include <EpetraExt_MatrixMatrix.h>
 #include "dg/dg_base.hpp"
 #include "reduced_order/pod_basis_base.h"
-#include "testing/pod_adaptive_sampling.h"
+#include "pod_adaptive_sampling.h"
 #include "parameters/all_parameters.h"
 
 namespace PHiLiP {
@@ -30,7 +30,7 @@ public:
         const dealii::ParameterHandler &parameter_handler_input,
         std::shared_ptr<DGBase<dim,double>> &dg_input, 
         std::shared_ptr<ProperOrthogonalDecomposition::PODBase<dim>> pod,
-        std::shared_ptr<Tests::AdaptiveSampling<dim,nstate>> parameter_sampling_input,
+        std::shared_ptr<AdaptiveSampling<dim,nstate>> parameter_sampling_input,
         Parameters::ODESolverParam::ODESolverEnum ode_solver_type);
 
     /// Destructor
@@ -48,7 +48,7 @@ public:
     std::shared_ptr<ProperOrthogonalDecomposition::PODBase<dim>> pod;
 
     /// Sampling Class (currently being used for the reinitParams and snapshot_parameters)
-    std::shared_ptr<Tests::AdaptiveSampling<dim,nstate>> parameter_sampling;
+    std::shared_ptr<AdaptiveSampling<dim,nstate>> parameter_sampling;
 
     const MPI_Comm mpi_communicator; ///< MPI communicator.
 

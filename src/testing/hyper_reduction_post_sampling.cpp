@@ -8,7 +8,7 @@
 #include "reduced_order/assemble_ECSW_jacobian.h"
 #include "linear_solver/NNLS_solver.h"
 #include "linear_solver/helper_functions.h"
-#include "pod_adaptive_sampling.h"
+#include "reduced_order/pod_adaptive_sampling.h"
 #include "reduced_order/hyper_reduced_adaptive_sampling.h"
 #include <eigen/Eigen/Dense>
 #include <iostream>
@@ -258,7 +258,7 @@ int HyperReductionPostSampling<dim, nstate>::run_test() const
     std::cout << rom_points << std::endl; 
     parameter_sampling->placeROMLocations(rom_points); */
 
-    parameter_sampling->run_test();
+    parameter_sampling->run_sampling();
     MatrixXd snapshot_parameters = parameter_sampling->snapshot_parameters;
 
     // Find C and d for NNLS Problem
