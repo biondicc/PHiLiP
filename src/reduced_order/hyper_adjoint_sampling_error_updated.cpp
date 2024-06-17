@@ -1,4 +1,4 @@
-#include "hyper_reduced_sampling_error_updated.h"
+#include "hyper_adjoint_sampling_error_updated.h"
 #include <iostream>
 #include <filesystem>
 #include "functional/functional.h"
@@ -17,15 +17,13 @@
 #include "halton.h"
 #include "min_max_scaler.h"
 #include "pod_adaptive_sampling.h"
-#include "assemble_ECSW_residual.h"
-#include "assemble_ECSW_jacobian.h"
-#include "linear_solver/NNLS_solver.h"
 #include "linear_solver/helper_functions.h"
+#include "adjoint_based_weights.h"
 
 namespace PHiLiP {
 
 template<int dim, int nstate>
-HyperreducedSamplingErrorUpdated<dim, nstate>::HyperreducedSamplingErrorUpdated(const PHiLiP::Parameters::AllParameters *const parameters_input,
+HyperAdjointSamplingErrorUpdated<dim, nstate>::HyperAdjointSamplingErrorUpdated(const PHiLiP::Parameters::AllParameters *const parameters_input,
                                                 const dealii::ParameterHandler &parameter_handler_input)
         : all_parameters(parameters_input),
         parameter_handler(parameter_handler_input)
@@ -45,7 +43,7 @@ HyperreducedSamplingErrorUpdated<dim, nstate>::HyperreducedSamplingErrorUpdated(
 }
 
 template <int dim, int nstate>
-int HyperreducedSamplingErrorUpdated<dim, nstate>::run_sampling() const
+int HyperAdjointSamplingErrorUpdated<dim, nstate>::run_sampling() const
 {
     this->pcout << "Starting adaptive sampling process" << std::endl;
 
@@ -56,43 +54,21 @@ int HyperreducedSamplingErrorUpdated<dim, nstate>::run_sampling() const
 
     auto ode_solver_type = Parameters::ODESolverParam::ODESolverEnum::hyper_reduced_petrov_galerkin_solver;
     
-    // Find C and d for NNLS Problem
-    this->pcout << "Construct instance of Assembler..."<< std::endl;  
-    std::shared_ptr<HyperReduction::AssembleECSWBase<dim,nstate>> constructer_NNLS_problem;
-    if (this->all_parameters->hyper_reduction_param.training_data == "residual")         
-        constructer_NNLS_problem = std::make_shared<HyperReduction::AssembleECSWRes<dim,nstate>>(this->all_parameters, this->parameter_handler, flow_solver->dg, this->current_pod, this->snapshot_parameters, ode_solver_type);
-    else {
-        constructer_NNLS_problem = std::make_shared<HyperReduction::AssembleECSWJac<dim,nstate>>(this->all_parameters, this->parameter_handler, flow_solver->dg, this->current_pod, this->snapshot_parameters, ode_solver_type);
-    }
-    this->pcout << "Build Problem..."<< std::endl;
-    constructer_NNLS_problem->build_problem();
+    HyperReduction::AdjointWeights<dim,nstate> adj_weights(this->all_parameters, this->parameter_handler, flow_solver->dg, this->current_pod, this->snapshot_parameters, ode_solver_type);
+    adj_weights.build_problem();
 
-    // Transfer b vector (RHS of NNLS problem) to Epetra structure
-    Epetra_MpiComm Comm( MPI_COMM_WORLD );
-    Epetra_Map bMap = (constructer_NNLS_problem->A->trilinos_matrix()).RowMap();
-    Epetra_Vector b_Epetra (bMap);
-    auto b = constructer_NNLS_problem->b;
-    for(unsigned int i = 0 ; i < b.size() ; i++){
-        b_Epetra[i] = b(i);
-    }
+    dealii::Vector<double> weights_dealii(adj_weights.weights);
+    Epetra_MpiComm epetra_comm(MPI_COMM_WORLD);
+    int num_elements_N_e = flow_solver->dg->triangulation->n_active_cells();
+    Epetra_Map num_cells_map(num_elements_N_e, 0, epetra_comm);
+    Epetra_Vector epetra_weights(num_cells_map);
+    for(int j = 0 ; j < epetra_weights.GlobalLength() ; j++){
+        epetra_weights[j] = weights_dealii[j];
+    } 
 
-    // Solve NNLS Problem for ECSW weights
-    this->pcout << "Create NNLS problem..."<< std::endl;
-    NNLS_solver NNLS_prob(all_parameters, parameter_handler, constructer_NNLS_problem->A->trilinos_matrix(), Comm, b_Epetra);
-    this->pcout << "Solve NNLS problem..."<< std::endl;
-    bool exit_con = NNLS_prob.solve();
-    this->pcout << exit_con << std::endl;
-
-    ptr_weights = std::make_shared<Epetra_Vector>(NNLS_prob.getSolution());
+    ptr_weights = std::make_shared<Epetra_Vector>(epetra_weights);
     this->pcout << "ECSW Weights"<< std::endl;
     this->pcout << *ptr_weights << std::endl;
-
-    int num_elements_N_e = flow_solver->dg->triangulation->n_active_cells();
-    dealii::Vector<double> weights_dealii(num_elements_N_e);
-    Epetra_Vector epetra_weights = *ptr_weights;
-    for(int j = 0 ; j < epetra_weights.GlobalLength() ; j++){
-        weights_dealii[j] = epetra_weights[j];
-    } 
 
     MatrixXd rom_points = nearest_neighbors->kPairwiseNearestNeighborsMidpoint();
     this->pcout << "ROM Points"<< std::endl;
@@ -126,38 +102,20 @@ int HyperreducedSamplingErrorUpdated<dim, nstate>::run_sampling() const
         current_pod->addSnapshot(fom_solution);
         current_pod->computeBasis();
 
-        // Find C and d for NNLS Problem
-        this->pcout << "Update Assembler..."<< std::endl;
-        constructer_NNLS_problem->updatePODSnaps(this->current_pod, this->snapshot_parameters);
-        this->pcout << "Build Problem..."<< std::endl;
-        constructer_NNLS_problem->build_problem();
+        HyperReduction::AdjointWeights<dim,nstate> adj_weights(this->all_parameters, this->parameter_handler, flow_solver->dg, this->current_pod, this->snapshot_parameters, ode_solver_type);
+        adj_weights.build_problem();
 
-        // Transfer b vector (RHS of NNLS problem) to Epetra structure
-        Epetra_MpiComm Comm( MPI_COMM_WORLD );
-        Epetra_Map bMap = (constructer_NNLS_problem->A->trilinos_matrix()).RowMap();
-        Epetra_Vector b_Epetra (bMap);
-        auto b = constructer_NNLS_problem->b;
-        for(unsigned int i = 0 ; i < b.size() ; i++){
-            b_Epetra[i] = b(i);
-        }
+        dealii::Vector<double> weights_dealii(adj_weights.weights);
+        int num_elements_N_e = flow_solver->dg->triangulation->n_active_cells();
+        Epetra_Map num_cells_map(num_elements_N_e, 0, epetra_comm);
+        Epetra_Vector epetra_weights(num_cells_map);
+        for(int j = 0 ; j < epetra_weights.GlobalLength() ; j++){
+            epetra_weights[j] = weights_dealii[j];
+        } 
 
-        // Solve NNLS Problem for ECSW weights
-        this->pcout << "Create NNLS problem..."<< std::endl;
-        NNLS_solver NNLS_prob(all_parameters, parameter_handler, constructer_NNLS_problem->A->trilinos_matrix(), Comm, b_Epetra);
-        this->pcout << "Solve NNLS problem..."<< std::endl;
-        bool exit_con = NNLS_prob.solve();
-        this->pcout << exit_con << std::endl;
-        
-        ptr_weights = std::make_shared<Epetra_Vector>(NNLS_prob.getSolution());
+        ptr_weights = std::make_shared<Epetra_Vector>(epetra_weights);
         this->pcout << "ECSW Weights"<< std::endl;
         this->pcout << *ptr_weights << std::endl;
-        
-        int num_elements_N_e = flow_solver->dg->triangulation->n_active_cells();
-        dealii::Vector<double> weights_dealii(num_elements_N_e);
-        Epetra_Vector epetra_weights = *ptr_weights;
-        for(int j = 0 ; j < epetra_weights.GlobalLength() ; j++){
-            weights_dealii[j] = epetra_weights[j];
-        } 
 
         // Update previous ROM errors with updated current_pod
         for(auto it = rom_locations.begin(); it != rom_locations.end(); ++it){
@@ -189,7 +147,7 @@ int HyperreducedSamplingErrorUpdated<dim, nstate>::run_sampling() const
     std::ofstream weights_table_file("weights_table_iteration_final.txt");
     weights_table->write_text(weights_table_file, dealii::TableHandler::TextOutputFormat::org_mode_table);
     weights_table_file.close();
-    
+
     flow_solver->dg->reduced_mesh_weights = weights_dealii;
     flow_solver->dg->output_results_vtk(iteration);
 
@@ -197,7 +155,7 @@ int HyperreducedSamplingErrorUpdated<dim, nstate>::run_sampling() const
 }
 
 template <int dim, int nstate>
-void HyperreducedSamplingErrorUpdated<dim, nstate>::outputIterationData(std::string iteration) const{
+void HyperAdjointSamplingErrorUpdated<dim, nstate>::outputIterationData(std::string iteration) const{
     std::unique_ptr<dealii::TableHandler> snapshot_table = std::make_unique<dealii::TableHandler>();
 
     std::ofstream solution_out_file("solution_snapshots_iteration_" +  iteration + ".txt");
@@ -233,7 +191,7 @@ void HyperreducedSamplingErrorUpdated<dim, nstate>::outputIterationData(std::str
 }
 
 template <int dim, int nstate>
-RowVectorXd HyperreducedSamplingErrorUpdated<dim, nstate>::getMaxErrorROM() const{
+RowVectorXd HyperAdjointSamplingErrorUpdated<dim, nstate>::getMaxErrorROM() const{
     this->pcout << "Updating RBF interpolation..." << std::endl;
 
     int n_rows = snapshot_parameters.rows() + rom_locations.size();
@@ -344,7 +302,7 @@ RowVectorXd HyperreducedSamplingErrorUpdated<dim, nstate>::getMaxErrorROM() cons
 }
 
 template <int dim, int nstate>
-void HyperreducedSamplingErrorUpdated<dim, nstate>::placeInitialSnapshots() const{
+void HyperAdjointSamplingErrorUpdated<dim, nstate>::placeInitialSnapshots() const{
     for(auto snap_param : snapshot_parameters.rowwise()){
         this->pcout << "Sampling initial snapshot at " << snap_param << std::endl;
         dealii::LinearAlgebra::distributed::Vector<double> fom_solution = solveSnapshotFOM(snap_param);
@@ -354,7 +312,7 @@ void HyperreducedSamplingErrorUpdated<dim, nstate>::placeInitialSnapshots() cons
 }
 
 template <int dim, int nstate>
-bool HyperreducedSamplingErrorUpdated<dim, nstate>::placeROMLocations(const MatrixXd& rom_points, Epetra_Vector weights) const{
+bool HyperAdjointSamplingErrorUpdated<dim, nstate>::placeROMLocations(const MatrixXd& rom_points, Epetra_Vector weights) const{
     bool error_greater_than_tolerance = false;
     std::unique_ptr<FlowSolver::FlowSolver<dim,nstate>> flow_solver = FlowSolver::FlowSolverFactory<dim,nstate>::select_flow_case(all_parameters, parameter_handler);
 
@@ -386,7 +344,7 @@ bool HyperreducedSamplingErrorUpdated<dim, nstate>::placeROMLocations(const Matr
 }
 
 template <int dim, int nstate>
-void HyperreducedSamplingErrorUpdated<dim, nstate>::updateNearestExistingROMs(const RowVectorXd& /*parameter*/, Epetra_Vector weights) const{
+void HyperAdjointSamplingErrorUpdated<dim, nstate>::updateNearestExistingROMs(const RowVectorXd& /*parameter*/, Epetra_Vector weights) const{
     std::unique_ptr<FlowSolver::FlowSolver<dim,nstate>> flow_solver = FlowSolver::FlowSolverFactory<dim,nstate>::select_flow_case(all_parameters, parameter_handler);
 
     this->pcout << "Verifying ROM points for recomputation." << std::endl;
@@ -429,7 +387,7 @@ void HyperreducedSamplingErrorUpdated<dim, nstate>::updateNearestExistingROMs(co
 }
 
 template <int dim, int nstate>
-dealii::LinearAlgebra::distributed::Vector<double> HyperreducedSamplingErrorUpdated<dim, nstate>::solveSnapshotFOM(const RowVectorXd& parameter) const{
+dealii::LinearAlgebra::distributed::Vector<double> HyperAdjointSamplingErrorUpdated<dim, nstate>::solveSnapshotFOM(const RowVectorXd& parameter) const{
     this->pcout << "Solving FOM at " << parameter << std::endl;
     Parameters::AllParameters params = reinitParams(parameter);
 
@@ -446,7 +404,7 @@ dealii::LinearAlgebra::distributed::Vector<double> HyperreducedSamplingErrorUpda
 }
 
 template <int dim, int nstate>
-std::unique_ptr<ProperOrthogonalDecomposition::ROMSolution<dim,nstate>> HyperreducedSamplingErrorUpdated<dim, nstate>::solveSnapshotROM(const RowVectorXd& parameter, Epetra_Vector weights) const{
+std::unique_ptr<ProperOrthogonalDecomposition::ROMSolution<dim,nstate>> HyperAdjointSamplingErrorUpdated<dim, nstate>::solveSnapshotROM(const RowVectorXd& parameter, Epetra_Vector weights) const{
     this->pcout << "Solving ROM at " << parameter << std::endl;
     Parameters::AllParameters params = reinitParams(parameter);
 
@@ -472,7 +430,7 @@ std::unique_ptr<ProperOrthogonalDecomposition::ROMSolution<dim,nstate>> Hyperred
 }
 
 template <int dim, int nstate>
-Parameters::AllParameters HyperreducedSamplingErrorUpdated<dim, nstate>::reinitParams(const RowVectorXd& parameter) const{
+Parameters::AllParameters HyperAdjointSamplingErrorUpdated<dim, nstate>::reinitParams(const RowVectorXd& parameter) const{
     // Copy all parameters
     PHiLiP::Parameters::AllParameters parameters = *(this->all_parameters);
 
@@ -522,7 +480,7 @@ Parameters::AllParameters HyperreducedSamplingErrorUpdated<dim, nstate>::reinitP
 }
 
 template <int dim, int nstate>
-void HyperreducedSamplingErrorUpdated<dim, nstate>::configureInitialParameterSpace() const
+void HyperAdjointSamplingErrorUpdated<dim, nstate>::configureInitialParameterSpace() const
 {
     const double pi = atan(1.0) * 4.0;
 
@@ -599,11 +557,11 @@ void HyperreducedSamplingErrorUpdated<dim, nstate>::configureInitialParameterSpa
 }
 
 #if PHILIP_DIM==1
-        template class HyperreducedSamplingErrorUpdated<PHILIP_DIM, PHILIP_DIM>;
+        template class HyperAdjointSamplingErrorUpdated<PHILIP_DIM, PHILIP_DIM>;
 #endif
 
 #if PHILIP_DIM!=1
-        template class HyperreducedSamplingErrorUpdated<PHILIP_DIM, PHILIP_DIM+2>;
+        template class HyperAdjointSamplingErrorUpdated<PHILIP_DIM, PHILIP_DIM+2>;
 #endif
 
 }

@@ -73,6 +73,13 @@ int HyperreducedAdaptiveSampling<dim, nstate>::run_sampling() const
     this->pcout << "ECSW Weights"<< std::endl;
     this->pcout << *ptr_weights << std::endl;
 
+    int num_elements_N_e = flow_solver->dg->triangulation->n_active_cells();
+    dealii::Vector<double> weights_dealii(num_elements_N_e);
+    Epetra_Vector epetra_weights = *ptr_weights;
+    for(int j = 0 ; j < epetra_weights.GlobalLength() ; j++){
+        weights_dealii[j] = epetra_weights[j];
+    } 
+
     MatrixXd rom_points = this->nearest_neighbors->kPairwiseNearestNeighborsMidpoint();
     this->pcout << "ROM Points"<< std::endl;
     this->pcout << rom_points << std::endl;
@@ -94,6 +101,8 @@ int HyperreducedAdaptiveSampling<dim, nstate>::run_sampling() const
         std::ofstream weights_table_file("weights_table_iteration_" + std::to_string(iteration) + ".txt");
         weights_table->write_text(weights_table_file, dealii::TableHandler::TextOutputFormat::org_mode_table);
         weights_table_file.close();
+        flow_solver->dg->reduced_mesh_weights = weights_dealii;
+        flow_solver->dg->output_results_vtk(iteration);
 
         this->pcout << "Sampling snapshot at " << max_error_params << std::endl;
         dealii::LinearAlgebra::distributed::Vector<double> fom_solution = this->solveSnapshotFOM(max_error_params);
@@ -128,6 +137,13 @@ int HyperreducedAdaptiveSampling<dim, nstate>::run_sampling() const
         ptr_weights = std::make_shared<Epetra_Vector>(NNLS_prob.getSolution());
         this->pcout << "ECSW Weights"<< std::endl;
         this->pcout << *ptr_weights << std::endl;
+        
+        int num_elements_N_e = flow_solver->dg->triangulation->n_active_cells();
+        dealii::Vector<double> weights_dealii(num_elements_N_e);
+        Epetra_Vector epetra_weights = *ptr_weights;
+        for(int j = 0 ; j < epetra_weights.GlobalLength() ; j++){
+            weights_dealii[j] = epetra_weights[j];
+        } 
 
         // Update previous ROM errors with updated current_pod
         for(auto it = this->rom_locations.begin(); it != this->rom_locations.end(); ++it){
@@ -159,6 +175,9 @@ int HyperreducedAdaptiveSampling<dim, nstate>::run_sampling() const
     std::ofstream weights_table_file("weights_table_iteration_final.txt");
     weights_table->write_text(weights_table_file, dealii::TableHandler::TextOutputFormat::org_mode_table);
     weights_table_file.close();
+
+    flow_solver->dg->reduced_mesh_weights = weights_dealii;
+    flow_solver->dg->output_results_vtk(iteration);
 
     return 0;
 }
