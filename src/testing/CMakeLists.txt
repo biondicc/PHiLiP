@@ -43,6 +43,7 @@ set(TESTS_SOURCE
     HROM_error_post_sampling.cpp
     hyper_adaptive_sampling_new_error.cpp
     hyper_adjoint_sampling_new_error.cpp
+    hyper_DWR_LS_sampling_new_error.cpp
     bound_preserving_limiter_tests.cpp
     naca0012_unsteady_check_quick.cpp
     )

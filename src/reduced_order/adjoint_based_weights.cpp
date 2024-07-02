@@ -136,8 +136,6 @@ void AdjointWeights<dim,nstate>::build_problem(){
         std::unique_ptr<DualWeightedResidualError<dim, nstate, double>> mesh_error = std::make_unique<DualWeightedResidualError<dim, nstate, double>>(this->dg);
         estimated_error_per_cell = mesh_error->compute_cellwise_errors();
         
-        std::cout << "Estimated Error per Cell" << std::endl;
-        estimated_error_per_cell.print(std::cout);
         if (snap_num == 0){
             error_sum = estimated_error_per_cell;
         }

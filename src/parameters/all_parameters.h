@@ -211,6 +211,7 @@ public:
         HROM_error_post_sampling,
         hyper_adaptive_sampling_new_error,
         hyper_adjoint_sampling_new_error,
+        hyper_DWR_LS_sampling_new_error,
         low_density
     };
     /// Store selected TestType from the input file.

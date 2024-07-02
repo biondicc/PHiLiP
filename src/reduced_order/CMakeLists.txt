@@ -16,7 +16,9 @@ set(SOURCE
     hrom_test_location.cpp
     hyper_reduced_sampling_error_updated.cpp
     adjoint_based_weights.cpp
-    hyper_adjoint_sampling_error_updated.cpp)
+    hyper_adjoint_sampling_error_updated.cpp
+    DWR_LS_weights.cpp
+    hyper_DWR_LS_sampling_error_updated.cpp)
 
 foreach(dim RANGE 1 3)
     # Output library

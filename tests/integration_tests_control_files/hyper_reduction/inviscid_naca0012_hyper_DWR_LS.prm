@@ -1,7 +1,7 @@
 # Listing of Parameters
 # ---------------------
 
-set test_type = hyper_adjoint_sampling_new_error
+set test_type = hyper_DWR_LS_sampling_new_error
 set dimension = 2
 set pde_type  = euler
 
@@ -68,7 +68,7 @@ subsection reduced order
 end
 
 subsection hyperreduction
-  set NNLS_tol = 1E-06
+  set NNLS_tol = 1E-16
   set NNLS_max_iter = 5000
   set training_data = jacobian
 end

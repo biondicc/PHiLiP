@@ -132,3 +132,17 @@ add_test(
         mv weights_table_iteration_final.txt ./1d_burgers_hyper_new_error_results ; "
         WORKING_DIRECTORY ${TEST_OUTPUT_DIR}
 )
+
+# configure_file(inviscid_naca0012_hyper_adjoint.prm inviscid_naca0012_hyper_adjoint.prm COPYONLY)
+# add_test(
+#         NAME INVISCID_NACA0012_HYPER_ADJOINT
+#         COMMAND mpirun -np 1 ${EXECUTABLE_OUTPUT_PATH}/PHiLiP_2D -i ${CMAKE_CURRENT_BINARY_DIR}/inviscid_naca0012_hyper_adjoint.prm
+#         WORKING_DIRECTORY ${TEST_OUTPUT_DIR}
+# )
+
+# configure_file(inviscid_naca0012_hyper_DWR_LS.prm inviscid_naca0012_hyper_DWR_LS.prm COPYONLY)
+# add_test(
+#         NAME INVISCID_NACA0012_HYPER_DWR_LS
+#         COMMAND mpirun -np 1 ${EXECUTABLE_OUTPUT_PATH}/PHiLiP_2D -i ${CMAKE_CURRENT_BINARY_DIR}/inviscid_naca0012_hyper_DWR_LS.prm
+#         WORKING_DIRECTORY ${TEST_OUTPUT_DIR}
+# )
