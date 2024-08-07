@@ -107,7 +107,7 @@ void getROMPoints(Eigen::MatrixXd& rom_points, const Parameters::AllParameters *
         }
     }
     else if(all_parameters->reduced_order_param.parameter_names.size() == 2){
-        rom_points.conservativeResize(260, 2);
+        rom_points.conservativeResize(100, 2);
         RowVectorXd parameter1_range;
         parameter1_range.resize(2);
         parameter1_range << all_parameters->reduced_order_param.parameter_min_values[0], all_parameters->reduced_order_param.parameter_max_values[0];
@@ -127,7 +127,7 @@ void getROMPoints(Eigen::MatrixXd& rom_points, const Parameters::AllParameters *
         int row = 0;
         for (int i = 0; i < 20; i++){
             for(int j = 0; j < 20; j++){
-                if (i > 6){
+                if (i > 14){
                     rom_points(row, 0) =  parameter1_range[0] + (step_1 * i);
                     rom_points(row, 1) =  parameter2_range[0] + (step_2 * j);
 
