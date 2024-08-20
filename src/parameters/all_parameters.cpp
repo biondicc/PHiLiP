@@ -198,6 +198,7 @@ void AllParameters::declare_parameters (dealii::ParameterHandler &prm)
                       " hyper_adaptive_sampling_new_error |"
                       " hyper_adjoint_sampling_new_error |"
                       " hyper_DWR_LS_sampling_new_error |"
+                      " output_vtk_ECSW_weights |"
                       " naca0012_unsteady_check_quick | "
                       " khi_robustness | "
                       " low_density "),
@@ -249,6 +250,7 @@ void AllParameters::declare_parameters (dealii::ParameterHandler &prm)
                       "  hyper_adaptive_sampling_new_error |"
                       "  hyper_adjoint_sampling_new_error |"
                       "  hyper_DWR_LS_sampling_new_error |"
+                      "  output_vtk_ECSW_weights |"
                       "  naca0012_unsteady_check_quick | "
                       "  khi_robustness | "
                       "  low_density>.");
@@ -441,6 +443,7 @@ const std::string test_string = prm.get("test_type");
     else if (test_string == "hyper_adaptive_sampling_new_error")        { test_type = hyper_adaptive_sampling_new_error; }
     else if (test_string == "hyper_adjoint_sampling_new_error")         { test_type = hyper_adjoint_sampling_new_error; }
     else if (test_string == "hyper_DWR_LS_sampling_new_error")          { test_type = hyper_DWR_LS_sampling_new_error; }
+    else if (test_string == "output_vtk_ECSW_weights")                  { test_type = output_vtk_ECSW_weights; }
     else if (test_string == "low_density")                              { test_type = low_density; }
     else if (test_string == "naca0012_unsteady_check_quick")            { test_type = naca0012_unsteady_check_quick; }
     

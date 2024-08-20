@@ -44,6 +44,7 @@ set(TESTS_SOURCE
     hyper_adaptive_sampling_new_error.cpp
     hyper_adjoint_sampling_new_error.cpp
     hyper_DWR_LS_sampling_new_error.cpp
+    output_vtk_ECSW_weights.cpp
     bound_preserving_limiter_tests.cpp
     naca0012_unsteady_check_quick.cpp
     )

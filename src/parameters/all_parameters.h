@@ -212,6 +212,7 @@ public:
         hyper_adaptive_sampling_new_error,
         hyper_adjoint_sampling_new_error,
         hyper_DWR_LS_sampling_new_error,
+        output_vtk_ECSW_weights,
         low_density
     };
     /// Store selected TestType from the input file.

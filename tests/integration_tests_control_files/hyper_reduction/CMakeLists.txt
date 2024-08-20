@@ -146,3 +146,16 @@ add_test(
 #         COMMAND mpirun -np 1 ${EXECUTABLE_OUTPUT_PATH}/PHiLiP_2D -i ${CMAKE_CURRENT_BINARY_DIR}/inviscid_naca0012_hyper_DWR_LS.prm
 #         WORKING_DIRECTORY ${TEST_OUTPUT_DIR}
 # )
+
+# configure_file(output_weights_NACA.prm output_weights_NACA.prm  COPYONLY)
+# add_test(
+#         NAME OUTPUT_VTK_WEIGHTS
+#         COMMAND bash -c
+#         "if [ -d  ${CMAKE_CURRENT_BINARY_DIR}/weights ]; then
+#                 mpirun -np 1 ${EXECUTABLE_OUTPUT_PATH}/PHiLiP_2D -i ${CMAKE_CURRENT_BINARY_DIR}/output_weights_NACA.prm;
+#         else
+#                 echo 'Ensure folder weights exists';
+#                 exit 1;
+#         fi"
+#         WORKING_DIRECTORY ${TEST_OUTPUT_DIR}
+# )

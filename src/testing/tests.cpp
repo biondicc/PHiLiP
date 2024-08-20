@@ -54,6 +54,7 @@
 #include "hyper_adaptive_sampling_new_error.h"
 #include "hyper_adjoint_sampling_new_error.h"
 #include "hyper_DWR_LS_sampling_new_error.h"
+#include "output_vtk_ECSW_weights.h"
 
 namespace PHiLiP {
 namespace Tests {
@@ -330,6 +331,8 @@ std::unique_ptr< TestsBase > TestsFactory<dim,nstate,MeshType>
         if constexpr ((dim==2 && nstate==dim+2) || (dim==1 && nstate==1))  return std::make_unique<HyperAdjointSamplingNewError<dim,nstate>>(parameters_input, parameter_handler_input);
     } else if(test_type == Test_enum::hyper_DWR_LS_sampling_new_error) {
         if constexpr ((dim==2 && nstate==dim+2) || (dim==1 && nstate==1))  return std::make_unique<HyperDWRLSSamplingNewError<dim,nstate>>(parameters_input, parameter_handler_input);
+    } else if(test_type == Test_enum::output_vtk_ECSW_weights) {
+        if constexpr ((dim==2 && nstate==dim+2) || (dim==1 && nstate==1))  return std::make_unique<OutputVTKWeights<dim,nstate>>(parameters_input, parameter_handler_input);
     } else if (test_type == Test_enum::advection_limiter) {
         if constexpr (nstate == 1 && dim < 3) return std::make_unique<BoundPreservingLimiterTests<dim, nstate>>(parameters_input, parameter_handler_input);
     } else if (test_type == Test_enum::burgers_limiter) {
